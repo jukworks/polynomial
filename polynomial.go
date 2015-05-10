@@ -52,7 +52,6 @@ func (p Poly) GetDegree() int {
 
 func (p Poly) String() (s string) {
 	s = "["
-	// s = fmt.Sprintf("[Degree: %d] ", p.GetDegree())
 	for i := len(p) - 1; i >= 0; i-- {
 		switch p[i].Sign() {
 		case -1:
@@ -88,6 +87,15 @@ func (p Poly) String() (s string) {
 	return
 }
 
+/*
+	Compare()는 두 개의 다항식을 비교함.
+	현 다항식을 복사할 필요는 없으므로 포인터로 받으며,
+	비교 대상 다항식도 효율성을 위해 포인터로 받음.
+	두 디항식이 동일하면 0,
+	인자로 넘겨준 다항식이 더 크면 1,
+	그렇지 않으면 -1을 반환.
+	차수가 크면 무조건 큰 다항식이며, 차수가 같을 시에는 계수값을 비교함.
+*/
 func (p *Poly) Compare(q *Poly) int {
 	switch {
 	case p.GetDegree() > q.GetDegree():
@@ -106,6 +114,10 @@ func (p *Poly) Compare(q *Poly) int {
 	return 0
 }
 
+/*
+	Add()는 두 다항식을 더하는 함수.
+	추가 인자로는 modulo를 줄 수 있으며, modulo 연산을 하고 싶지 않을 경우에는 nil을 주면 됨.
+*/
 func (p Poly) Add(q Poly, m *big.Int) Poly {
 	if p.Compare(&q) < 0 {
 		return q.Add(p, m)
@@ -146,6 +158,14 @@ func (p *Poly) Neg() Poly {
 	return q
 }
 
+/*
+	Clone()은 주어진 다항식을 deep copy하여 새로운 다항식을 만들어주는 함수.
+	인자로 주어지는 adjust 정수값은 복사를 하면서 차수 변경을 할 때 이용한다.
+	adjust는 음수값을 가질 수 없으며 이 경우에는 다항식 0를 반환한다.
+	adjust값만큼 차수가 높아진 상태로 반환된다.
+	예를 들어, x + 1 다항식에 adjust값을 2를 주면 x^3 + x^2가 반환된다.
+	동일한 다항식을 복사하고 싶으면 adjust에 0을 넘겨주면 된다.
+*/
 func (p Poly) Clone(adjust int) Poly {
 	var q Poly = make([]*big.Int, len(p)+adjust)
 	if adjust < 0 {
@@ -162,6 +182,10 @@ func (p Poly) Clone(adjust int) Poly {
 	return q
 }
 
+/*
+	sanitize() 함수는 주어진 modulo 값을 이용하여,
+	현재 다항식의 계수에 modulo 연산을 적용한다.
+*/
 func (p *Poly) sanitize(m *big.Int) {
 	if m == nil {
 		return
@@ -201,6 +225,10 @@ func (p Poly) Mul(q Poly, m *big.Int) Poly {
 }
 
 func (p Poly) Div(q Poly, m *big.Int) (quo, rem Poly) {
+	if m != nil {
+		p.sanitize(m)
+		q.sanitize(m)
+	}
 	if p.GetDegree() < q.GetDegree() || q.isZero() {
 		quo = NewPolyInts(0)
 		rem = p.Clone(0)
@@ -253,6 +281,9 @@ func (p Poly) Div(q Poly, m *big.Int) (quo, rem Poly) {
 	return
 }
 
+/*
+	유클리드 알고리즘을 이용하여 최대공약 다항식을 계산하는 함수.
+*/
 func (p Poly) Gcd(q Poly, m *big.Int) Poly {
 	// fmt.Println("p:", p, ", q:", q)
 	if p.Compare(&q) < 0 {
@@ -268,6 +299,10 @@ func (p Poly) Gcd(q Poly, m *big.Int) Poly {
 	}
 }
 
+/*
+	Eval()은 주어진 함수 p(x)에 x값을 넣었을 때 어떤 값이 나오는지 계산하는 함수.
+	modulo값 m을 줄 수 있다.
+*/
 func (p Poly) Eval(x *big.Int, m *big.Int) (y *big.Int) {
 	y = big.NewInt(0)
 	accx := big.NewInt(1)
