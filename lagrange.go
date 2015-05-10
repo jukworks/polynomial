@@ -19,9 +19,9 @@ func (p Point) String() string {
 func (ps Points) String() string {
 	strs := make([]string, len(ps))
 	for i, p := range ps {
-		strs[i] = fmt.Sprintf("%v", p)
+		strs[i] = fmt.Sprintf("Point #%v (%v)", i+1, p)
 	}
-	return strings.Join(strs, ",")
+	return strings.Join(strs, "\n")
 }
 
 /*
@@ -46,11 +46,9 @@ func (ps Points) Lagrange(m *big.Int) (lag Poly) {
 	}
 	lag = NewPolyInts(0) // Lx 다항식(L1, L2, L3, ...)들을 모두 더하기 위한 변수
 	n := len(ps)         // 주어진 점(힌트)의 개수
-	for i := 0; i < n; i++ {
+	for i, con, deno := 0, new(big.Int), new(big.Int); i < n; i++ {
 		lx := NewPolyInts(1)
-		con := new(big.Int)
 		con.Set(ps[i].y)
-		deno := new(big.Int)
 		for j := 0; j < n; j++ { // Lx를 계산하는 루프
 			if i == j {
 				continue
@@ -62,12 +60,9 @@ func (ps Points) Lagrange(m *big.Int) (lag Poly) {
 			con.Mul(con, deno)
 			con.Mod(con, m) // y값과 분모값을 모두 곱해준다
 		}
-		// fmt.Println(lx, "*", con)
-		for k := 0; k < len(lx); k++ { // 계산된 상수를 각 coefficient에 곱해준다.
+		for k := 0; k <= lx.GetDegree(); k++ { // 계산된 상수를 각 coefficient에 곱해준다.
 			lx[k].Mul(lx[k], con)
-			if m != nil {
-				lx[k].Mod(lx[k], m)
-			}
+			lx[k].Mod(lx[k], m)
 		}
 		lx.trim()
 		// fmt.Printf("Lt[%v] = %v (Constant part: %v)\n", i, lx, con)

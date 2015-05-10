@@ -162,12 +162,25 @@ func (p Poly) Clone(adjust int) Poly {
 	return q
 }
 
+func (p *Poly) sanitize(m *big.Int) {
+	if m == nil {
+		return
+	}
+	for i := 0; i <= (*p).GetDegree(); i++ {
+		(*p)[i].Mod((*p)[i], m)
+	}
+}
+
 func (p Poly) Sub(q Poly, m *big.Int) Poly {
 	r := q.Neg()
 	return p.Add(r, m)
 }
 
 func (p Poly) Mul(q Poly, m *big.Int) Poly {
+	if m != nil {
+		p.sanitize(m)
+		q.sanitize(m)
+	}
 	var r Poly = make([]*big.Int, p.GetDegree()+q.GetDegree()+1)
 	for i := 0; i < len(r); i++ {
 		r[i] = big.NewInt(0)

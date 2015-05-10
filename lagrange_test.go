@@ -20,6 +20,32 @@ func mkTestSet(p Poly, start *big.Int, nhints int, q *big.Int) Points {
 	return pts
 }
 
+func TestMinusConst(t *testing.T) {
+	cases := []struct {
+		a   *big.Int
+		ans Poly
+	}{
+		{
+			big.NewInt(1),
+			NewPolyInts(-1, 1),
+		},
+		{
+			big.NewInt(-8),
+			NewPolyInts(8, 1),
+		},
+		{
+			big.NewInt(54321),
+			NewPolyInts(-54321, 1),
+		},
+	}
+	for _, c := range cases {
+		res := xMinusConst(c.a)
+		if res.Compare(&c.ans) != 0 {
+			t.Errorf("(x-a) from %v != %v (your answer was %v)", c.a, c.ans, res)
+		}
+	}
+}
+
 func TestLagrange(t *testing.T) {
 	cases := []struct {
 		ps  Points
