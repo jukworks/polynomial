@@ -24,21 +24,17 @@ func (ps Points) String() string {
 	return strings.Join(strs, "\n")
 }
 
-/*
-	a를 주면 (x-a) 다항식을 반환
-*/
+// a를 주면 (x-a) 다항식을 반환
 func xMinusConst(a *big.Int) Poly {
 	b := new(big.Int)
 	b.Neg(a)
 	return Poly{b, big.NewInt(1)}
 }
 
-/*
-	라그랑주 다항식 기법은 modulo 연산을 하지 않고도 사용할 수 있지만,
-	Big Integer를 이용한 다항식만 취급하기 때문에 분수 처리를 할 수 없고,
-	따라서 나머지 연산을 통해 모두 정수화 시켜서 계산한다.
-	따라서 파라미터 m이 주어지지 않으면 P = 0 다항식을 반환하도록 했다.
-*/
+//	라그랑주 다항식 기법은 modulo 연산을 하지 않고도 사용할 수 있지만,
+//	Big Integer를 이용한 다항식만 취급하기 때문에 분수 처리를 할 수 없고,
+//	따라서 나머지 연산을 통해 모두 정수화 시켜서 계산한다.
+//	따라서 파라미터 m이 주어지지 않으면 P = 0 다항식을 반환하도록 했다.
 func (ps Points) Lagrange(m *big.Int) (lag Poly) {
 	// fmt.Println("--------------------------------")
 	if m == nil {

@@ -1,6 +1,7 @@
 package polynomial
 
 import (
+	"fmt"
 	"math/big"
 	"testing"
 )
@@ -120,6 +121,31 @@ func TestAdd(t *testing.T) {
 	}
 }
 
+func ExampleRandPoly() {
+	p := RandomPoly(10, 128) // 계수의 크기가 0~2^128인 임의의 10차 다항식 생성
+	fmt.Println(p)
+}
+
+func BenchmarkAddTwoIntCoeffPolynomial(b *testing.B) {
+	p := NewPolyInts(4, 0, 0, 3, 0, 1)
+	q := NewPolyInts(0, 0, 0, 4, 0, 0, 6)
+	m := big.NewInt(11)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.Add(q, m)
+	}
+}
+
+func BenchmarkAddTwoBigInt128bitCoeffPolynomial(b *testing.B) {
+	p := RandomPoly(10, 128)
+	q := RandomPoly(10, 128)
+	m := RandomBigInt(128)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.Add(q, m)
+	}
+}
+
 func TestSub(t *testing.T) {
 	cases := []struct {
 		p   Poly
@@ -178,6 +204,16 @@ func TestSub(t *testing.T) {
 	}
 }
 
+func BenchmarkSub(b *testing.B) {
+	p := NewPolyInts(4, 0, 0, 3, 0, 1)
+	q := NewPolyInts(0, 0, 0, 4, 0, 0, 6)
+	m := big.NewInt(11)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.Sub(q, m)
+	}
+}
+
 func TestMuliply(t *testing.T) {
 	cases := []struct {
 		p   Poly
@@ -215,6 +251,16 @@ func TestMuliply(t *testing.T) {
 		if res.Compare(&c.ans) != 0 {
 			t.Errorf("%v + %v != %v (your answer was %v)\n", c.p, c.q, c.ans, res)
 		}
+	}
+}
+
+func BenchmarkMultiply(b *testing.B) {
+	p := NewPolyInts(4, 0, 0, 3, 0, 1)
+	q := NewPolyInts(0, 0, 0, 4, 0, 0, 6)
+	m := big.NewInt(11)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.Mul(q, m)
 	}
 }
 
