@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestGenShares(t *testing.T) {
+func TestGenRandomShares(t *testing.T) {
 	q := big.NewInt(179424691)
 
 	for i := 0; i < 10; i++ {
-		ps, p := GenShares(10, 7, q)
+		ps, p := GenRandomShares(10, 7, q)
 		for j := len(ps); j >= 7; j-- {
 			var testps Points = ps[:j]
 			recoveredPoly := testps.Lagrange(q)

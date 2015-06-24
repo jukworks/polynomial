@@ -5,11 +5,8 @@ import (
 	"testing"
 )
 
-/*
-	테스트 set을 만들 다항식(p)과 x의 시작값(start)를 주면 1씩 증가하면서
-	라그랑주 폼의 테스트를 위해서 nhints 개수 만큼의 (x, y) 포인트를 만드는 함수.
-	q는 modulo.
-*/
+// Generates the given number (nhints) of points (x, y)
+// q: modulo
 func mkTestSet(p Poly, start *big.Int, nhints int, q *big.Int) Points {
 	var pts Points = make([]Point, nhints)
 	for i := 0; i < nhints; i++ {
@@ -52,6 +49,14 @@ func TestLagrange(t *testing.T) {
 		m   *big.Int
 		ans Poly
 	}{
+		{
+			Points{
+				Point{big.NewInt(1), big.NewInt(1)},
+				Point{big.NewInt(2), big.NewInt(4)},
+			},
+			nil,
+			NewPolyInts(0),
+		},
 		{
 			Points{
 				Point{big.NewInt(1), big.NewInt(1)},

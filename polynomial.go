@@ -1,11 +1,8 @@
 package polynomial
 
-// 공개된 다항식 라이브러리는 대부분 실수를 계수로 이용하는 것이다.
-// 이 라이브러리는 큰 정수(Big Integer)를 계수로 사용하는 다항식 연산을 위한 것이다.
-// 따라서 부동소수점 계수나 분수로 표현된 계수는 연산하지 못한다.
-// 큰 정수는 보통 암호 관련 기술에 사용되며 대부분 Cyclic group에서 동작하도록 설정되어
-// modulo 연산을 함께 수행해주어야 한다.
-// 본 라이브러리는 다항식의 덧셈, 뺄셈, 곱셈, 나눗셈(나머지), 최대공약다향식을 구한다.
+// This library handles polynomials made of BigInterger coefficients
+// BigInteger is usually used for cryptographic things and works with modulo arithmetic
+// Supported arithmetic: add, substract, multiply, divide (and reminder), GCD
 import (
 	"fmt"
 	"math/big"
@@ -13,20 +10,13 @@ import (
 	"time"
 )
 
-// 다항식 계수가 sparsely 배치될 수도 있어 효율적인 자료구조를 설정할 수 있지만
-// 1) 구현 편의성
-// 2) 곱셈이나 나눗셈을 하면 점점 dense해지는 것
-// 을 이유로 배열 형태로 계수를 저장한다.
-// 다항식은 계수를 역순으로 저장한다. y = 3x^3 + 2x + 1이라면
-// [1 2 0 3] 형식으로 저장한다.
+// This is the data structure for a polynomial
+// Just an array in reverse
+// f(x) = 3x^3 + 2x + 1 => [1 2 0 3]
 type Poly []*big.Int
 
-// Golang에서 큰 정수를 만드는 것은 다소 귀찮은 작업이므로,
-// 편의를 위해 정수를 나열해주면 다항식을 생성해주는 헬퍼이다.
+// Helper function for generating a polynomial with given integers
 func NewPolyInts(coeffs ...int) (p Poly) {
-	if coeffs == nil {
-		return Poly{big.NewInt(0)}
-	}
 	p = make([]*big.Int, len(coeffs))
 	for i := 0; i < len(coeffs); i++ {
 		p[i] = big.NewInt(int64(coeffs[i]))
