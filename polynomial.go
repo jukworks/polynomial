@@ -1,8 +1,5 @@
 package polynomial
 
-// This library handles polynomials made of BigInterger coefficients
-// BigInteger is usually used for cryptographic things and works with modulo arithmetic
-// Supported arithmetic: add, substract, multiply, divide (and reminder), GCD
 import (
 	"fmt"
 	"math/big"
@@ -10,7 +7,7 @@ import (
 	"time"
 )
 
-// This is the data structure for a polynomial
+// Data structure for a polynomial
 // Just an array in reverse
 // f(x) = 3x^3 + 2x + 1 => [1 2 0 3]
 type Poly []*big.Int
@@ -25,8 +22,9 @@ func NewPolyInts(coeffs ...int) (p Poly) {
 	return
 }
 
-// 주어진 차수(degree)의 임의 다항식을 만든다.
-// 계수의 크기는 [0, 2^bits)의 임의 숫자.
+// Returns a polynomial with random coefficients
+// You can give the degree of the polynomial
+// A random coefficients have a [0, 2^bits) integer
 func RandomPoly(degree, bits int64) (p Poly) {
 	p = make(Poly, degree+1)
 	rr := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -40,14 +38,13 @@ func RandomPoly(degree, bits int64) (p Poly) {
 	return
 }
 
-// trim()은 다항식의 최고차 항의 계수가 0이 되지 않도록 조정한다.
-// 최고차 항의 계수가 0인 다항식은 있을 수 없기 때문에 항상 내부적으로만 사용된다.
-// 덧셈, 뺄셈 등을 수행하다보면 최고차 항이 소거되는 경우가 발생하고
-// 이 때 계수 0이 남아 있어 degree가 잘못 계산되는 것을 방지하기 위해 사용한다.
+// trim() makes sure that the highest coefficient never has zero value
+// when you add or subtract two polynomials, sometimes the highest coefficient goes zero
+// if you don't remove the highest and zero coefficient, GetDegree() returns the wrong result
 func (p *Poly) trim() {
 	var last int = 0
-	for i := p.GetDegree(); i > 0; i-- { // i > 0 인 이유는 상수항은 제거되지 않기 때문.
-		if (*p)[i].Sign() != 0 { // 역으로 검색하면서 0이 아닌 최고차 항을 찾는다.
+	for i := p.GetDegree(); i > 0; i-- { // why i > 0, not i >=0? do not remove the constant
+		if (*p)[i].Sign() != 0 {
 			last = i
 			break
 		}
@@ -55,7 +52,7 @@ func (p *Poly) trim() {
 	*p = (*p)[:(last + 1)]
 }
 
-// isZero() 함수는 현재 다항식 P = 0 인지 점검하는 함수.
+// isZero() checks if P = 0
 func (p *Poly) isZero() bool {
 	if p.GetDegree() == 0 && (*p)[0].Cmp(big.NewInt(0)) == 0 {
 		return true
@@ -63,11 +60,13 @@ func (p *Poly) isZero() bool {
 	return false
 }
 
-// 최고 차수를 반환하는 함수. 3차 방정식이면 3이 반환된다.
+// returns the degree
+// if p = x^3 + 2x^2 + 5, GetDegree() returns 3
 func (p Poly) GetDegree() int {
 	return len(p) - 1
 }
 
+// pretty print
 func (p Poly) String() (s string) {
 	s = "["
 	for i := len(p) - 1; i >= 0; i-- {
