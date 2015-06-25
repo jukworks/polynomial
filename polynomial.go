@@ -157,13 +157,6 @@ func (p Poly) Add(q Poly, m *big.Int) Poly {
 	return r
 }
 
-// 주어진 다항식의 계수에 모두 -1를 곱한다.
-func (p *Poly) NegSelf() {
-	for i := 0; i < len(*p); i++ {
-		(*p)[i].Neg((*p)[i])
-	}
-}
-
 // 주어진 다항식예 계수에 모두 마이너스를 취한 다항식을 새로 만들어서 반환한다.
 func (p *Poly) Neg() Poly {
 	var q Poly = make([]*big.Int, len(*p))
