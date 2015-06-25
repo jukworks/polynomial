@@ -511,6 +511,37 @@ func TestGcd(t *testing.T) {
 	}
 }
 
+func TestSanitize(t *testing.T) {
+	cases := []struct {
+		p   Poly
+		m   *big.Int
+		ans Poly
+	}{
+		{
+			NewPolyInts(1, 2, 3, 4),
+			nil,
+			NewPolyInts(1, 2, 3, 4),
+		},
+		{
+			NewPolyInts(1, 2, 3, 4),
+			big.NewInt(1),
+			NewPolyInts(0),
+		},
+		{
+			NewPolyInts(1, 2, 3, 4),
+			big.NewInt(2),
+			NewPolyInts(1, 0, 1),
+		},
+	}
+	for _, c := range cases {
+		q := (c.p).Clone(0)
+		q.sanitize(c.m)
+		if q.Compare(&c.ans) != 0 {
+			t.Errorf("Sanitized %v with %v != %v", c.p, c.m, c.ans)
+		}
+	}
+}
+
 func TestEval(t *testing.T) {
 	cases := []struct {
 		p         Poly

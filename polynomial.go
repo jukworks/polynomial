@@ -199,6 +199,7 @@ func (p *Poly) sanitize(m *big.Int) {
 	for i := 0; i <= (*p).GetDegree(); i++ {
 		(*p)[i].Mod((*p)[i], m)
 	}
+	p.trim()
 }
 
 // 두 다항식을 빼는 함수. 미리 만들어둔 Add 함수를 활용하기 위해 A + (-B)로 계산한다.
