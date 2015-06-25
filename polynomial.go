@@ -104,14 +104,10 @@ func (p Poly) String() (s string) {
 	return
 }
 
-// Compare 함수는 두 개의 다항식을 비교한다.
-// 현 다항식을 복사할 필요는 없으므로 포인터로 받으며,
-// 비교 대상 다항식도 효율성을 위해 포인터로 받는다.
-// 두 디항식이 동일하면 0,
-// 인자로 넘겨준 다항식이 더 크면 1,
-// 그렇지 않으면 -1을 반환한다.
-// 알고리즘은 간단하다.
-// 차수가 크면 무조건 큰 다항식이며, 차수가 같을 시에는 계수값을 비교한다.
+// Compare() compares two polynomials and returns -1, 0, or 1
+// if P == Q, returns 0
+// if P > Q, returns 1
+// if P < Q, returns -1
 func (p *Poly) Compare(q *Poly) int {
 	switch {
 	case p.GetDegree() > q.GetDegree():
@@ -130,9 +126,8 @@ func (p *Poly) Compare(q *Poly) int {
 	return 0
 }
 
-// Add()는 두 다항식을 더하는 함수다.
-// 추가 인자로는 modulo를 줄 수 있으며,
-// modulo 연산을 하고 싶지 않을 경우에는 nil을 주면 된다.
+// Add() adds two polynomials
+// modulo m can be nil
 func (p Poly) Add(q Poly, m *big.Int) Poly {
 	if p.Compare(&q) < 0 {
 		return q.Add(p, m)
@@ -157,7 +152,7 @@ func (p Poly) Add(q Poly, m *big.Int) Poly {
 	return r
 }
 
-// 주어진 다항식예 계수에 모두 마이너스를 취한 다항식을 새로 만들어서 반환한다.
+// Neg() returns a polynomial Q = -P
 func (p *Poly) Neg() Poly {
 	var q Poly = make([]*big.Int, len(*p))
 	for i := 0; i < len(*p); i++ {
@@ -168,12 +163,10 @@ func (p *Poly) Neg() Poly {
 	return q
 }
 
-// Clone()은 주어진 다항식을 deep copy하여 새로운 다항식을 만들어주는 함수.
-// 인자로 주어지는 adjust 정수값은 복사를 하면서 차수 변경을 할 때 이용한다.
-// adjust는 음수값을 가질 수 없으며 이 경우에는 다항식 0를 반환한다.
-// adjust값만큼 차수가 높아진 상태로 반환된다.
-// 예를 들어, x + 1 다항식에 adjust값을 2를 주면 x^3 + x^2가 반환된다.
-// 동일한 다항식을 복사하고 싶으면 adjust에 0을 넘겨주면 된다.
+// Clone() does deep-copy
+// adjust increases the degree of copied polynomial
+// adjust cannot have a negative integer
+// for example, P = x + 1 and adjust = 2, Clone() returns x^3 + x^2
 func (p Poly) Clone(adjust int) Poly {
 	var q Poly = make([]*big.Int, len(p)+adjust)
 	if adjust < 0 {
@@ -190,8 +183,7 @@ func (p Poly) Clone(adjust int) Poly {
 	return q
 }
 
-// sanitize() 함수는 주어진 modulo 값을 이용하여,
-// 현재 다항식의 계수 전체에 modulo 연산을 적용한다.
+// sanitize() does modular arithmetic with m
 func (p *Poly) sanitize(m *big.Int) {
 	if m == nil {
 		return
@@ -202,13 +194,14 @@ func (p *Poly) sanitize(m *big.Int) {
 	p.trim()
 }
 
-// 두 다항식을 빼는 함수. 미리 만들어둔 Add 함수를 활용하기 위해 A + (-B)로 계산한다.
+// Sub() subtracts P from Q
+// Since we already have Add(), Sub() does Add(P, -Q)
 func (p Poly) Sub(q Poly, m *big.Int) Poly {
 	r := q.Neg()
 	return p.Add(r, m)
 }
 
-// 두 다항식을 곱하는 함수.
+// P * Q
 func (p Poly) Mul(q Poly, m *big.Int) Poly {
 	if m != nil {
 		p.sanitize(m)
@@ -233,10 +226,7 @@ func (p Poly) Mul(q Poly, m *big.Int) Poly {
 	return r
 }
 
-//	현 다항식을 주어진 다항식으로 나누고 몫과 나머지를 반환하는 함수.
-//	modulo값을 줄 수 있고, 원하지 않을 경우 nil을 주면 된다.
-//	계수를 정수만 사용할 수 있어서 계수가 정확히 정수로 나눠지지 않을 경우는
-//	나눗셈을 수행할 수 없다. 따라서 이 경우에는 아래의 설명과 같이 나눗셈을 수행하지 않는다.
+// returns (P / Q, P % Q)
 func (p Poly) Div(q Poly, m *big.Int) (quo, rem Poly) {
 	if m != nil {
 		p.sanitize(m)
@@ -269,17 +259,15 @@ func (p Poly) Div(q Poly, m *big.Int) (quo, rem Poly) {
 		} else {
 			r.Div(t[td], q[qd])
 		}
-		// r의 값이 0이 된다는 것은 (modulo 연산을 하지 않을 때) 최고차 항이 배수 관계
-		// 아닌 경우다. 이 경우에는 결과가 실수(분수)로 나오게 되는데, 본 다항식 라이브러리
-		// 암호화를 위한 BigInt 다항식 계산을 위한 것으로 실수 결과가 필요 없다.
-		// 따라서 처리하지 않고 몫은 0, 나머지는 나누려했던 값으로 반환한다.
+		// if r == 0, it means that the highest coefficient of the result is not an integer
+		// this polynomial library handles integer coefficients
 		if r.Cmp(big.NewInt(0)) == 0 {
 			quo = NewPolyInts(0)
 			rem = p.Clone(0)
 			return
 		}
 		u := q.Clone(rd)
-		for i := rd; i < len(u); i++ { // rd 밑으로는 어차피 모두 0므로 곱셈을 할 필요 없음
+		for i := rd; i < len(u); i++ {
 			u[i].Mul(u[i], r)
 			if m != nil {
 				u[i].Mod(u[i], m)
@@ -294,25 +282,20 @@ func (p Poly) Div(q Poly, m *big.Int) (quo, rem Poly) {
 	return
 }
 
-// 유클리드 알고리즘을 이용하여 최대공약 다항식을 계산하는 함수.
-// 다항식 나눗셈, 나머지 연산이 구현되어 있으므로 그것을 활용
+// returns the greatest common divisor(GCD) of P and Q (Euclidean algorithm)
 func (p Poly) Gcd(q Poly, m *big.Int) Poly {
-	// fmt.Println("p:", p, ", q:", q)
 	if p.Compare(&q) < 0 {
 		return q.Gcd(p, m)
 	}
 	if q.isZero() {
-		// fmt.Println("Found:", p)
 		return p
 	} else {
 		_, rem := p.Div(q, m)
-		// fmt.Println("rem:", rem)
 		return q.Gcd(rem, m)
 	}
 }
 
-// Eval()은 주어진 함수 p(x)에 x값을 넣었을 때 어떤 값이 나오는지 계산하는 함수.
-// modulo값 m을 줄 수 있다.
+// Eval() returns p(v) where v is the given big integer
 func (p Poly) Eval(x *big.Int, m *big.Int) (y *big.Int) {
 	y = big.NewInt(0)
 	accx := big.NewInt(1)
