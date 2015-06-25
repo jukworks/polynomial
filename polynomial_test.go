@@ -80,6 +80,41 @@ func TestTrim(t *testing.T) {
 	}
 }
 
+func TestClone(t *testing.T) {
+	cases := []struct {
+		p   Poly
+		d   int
+		ans Poly
+	}{
+		{
+			NewPolyInts(-2, -1, 0, 1, 2),
+			-2,
+			NewPolyInts(0),
+		},
+		{
+			NewPolyInts(-2, -1, 0, 1, 2),
+			0,
+			NewPolyInts(-2, -1, 0, 1, 2),
+		},
+		{
+			NewPolyInts(-2, -1, 0, 1, 2),
+			1,
+			NewPolyInts(0, -2, -1, 0, 1, 2),
+		},
+		{
+			NewPolyInts(-2, -1, 0, 1, 2),
+			3,
+			NewPolyInts(0, 0, 0, -2, -1, 0, 1, 2),
+		},
+	}
+	for _, c := range cases {
+		q := c.p.Clone(c.d)
+		if q.Compare(&c.ans) != 0 {
+			t.Errorf("Cloning %v with %v adjust != %v", c.p, c.d, c.ans)
+		}
+	}
+}
+
 func TestAdd(t *testing.T) {
 	cases := []struct {
 		p   Poly
