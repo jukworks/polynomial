@@ -6,6 +6,41 @@ import (
 	"testing"
 )
 
+func TestPrettyPrint(t *testing.T) {
+	cases := []struct {
+		p   Poly
+		ans string
+	}{
+		{
+			NewPolyInts(0),
+			"[0]",
+		},
+		{
+			NewPolyInts(5, -4, 3, 3),
+			"[3x^3 + 3x^2 - 4x + 5]",
+		},
+		{
+			NewPolyInts(5, 6, 2),
+			"[2x^2 + 6x + 5]",
+		},
+		{
+			NewPolyInts(5, -2, 0, 2, 1, 3),
+			"[3x^5 + x^4 + 2x^3 - 2x + 5]",
+		},
+		{
+			NewPolyInts(2, 1, 0, -1, -2),
+			"[-2x^4 - x^3 + x + 2]",
+		},
+	}
+	for _, c := range cases {
+		s := fmt.Sprintf("%v", c.p)
+		if s != c.ans {
+			t.Errorf("Stringify %v should be %v", s, c.ans)
+		}
+	}
+
+}
+
 func TestTrim(t *testing.T) {
 	cases := []struct {
 		p   Poly
@@ -124,6 +159,18 @@ func TestAdd(t *testing.T) {
 func ExampleRandPoly() {
 	p := RandomPoly(10, 128) // 계수의 크기가 0~2^128인 임의의 10차 다항식 생성
 	fmt.Println(p)
+}
+
+func TestRandomPoly(t *testing.T) {
+	p := RandomPoly(10, 128)
+	if p.GetDegree() != 10 {
+		t.Errorf("Polynomial %v should have %v degrees", p, p.GetDegree())
+	}
+	for i := 0; i < p.GetDegree(); i++ {
+		if p[i].BitLen() > 128 {
+			t.Errorf("Polynomial %v has too large coefficient (%v bits)", p, p[i].BitLen())
+		}
+	}
 }
 
 func BenchmarkAddTwoIntCoeffPolynomial(b *testing.B) {
