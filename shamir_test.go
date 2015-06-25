@@ -25,4 +25,10 @@ func TestGenRandomShares(t *testing.T) {
 			}
 		}
 	}
+
+	q = big.NewInt(179424692)
+	ps, p := GenRandomShares(10, 6, q)
+	if ps != nil || p != nil {
+		t.Errorf("if the modulo is not a prime, GenRandomShares() should return *nil* points and *nil* polynomial (points: %v, polynomial: %v)", ps, p)
+	}
 }

@@ -6,7 +6,9 @@ import "math/big"
 // This polynomial will be solved with k points
 func GenRandomShares(n, k int, q *big.Int) (ps Points, p Poly) {
 	if q.ProbablyPrime(100) == false {
-		panic("The modulo should be a prime.")
+		ps = nil
+		p = nil
+		return
 	}
 	size := q.BitLen()/8 + 1
 	p = make([]*big.Int, k)
