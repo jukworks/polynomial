@@ -6,10 +6,12 @@ import (
 	"strings"
 )
 
+// Point type represents a coordinate (x, y) where x and y are big integers
 type Point struct {
 	x, y *big.Int
 }
 
+// Points type represents a set of Point type
 type Points []Point
 
 func (p Point) String() string {
