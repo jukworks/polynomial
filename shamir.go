@@ -2,8 +2,8 @@ package polynomial
 
 import "math/big"
 
-// Generates a polynomial and n points
-// This polynomial will be solved with k points
+// GenRandomShares generates a polynomial and n points
+// The polynomial can be solved with k points
 func GenRandomShares(n, k int, q *big.Int) (ps Points, p Poly) {
 	if q.ProbablyPrime(100) == false {
 		ps = nil
